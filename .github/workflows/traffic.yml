@@ -44,8 +44,21 @@ jobs:
             return [...map.values()].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
           };
 
+          // Snapshot pre-merge so we can short-circuit when GitHub's traffic
+          // API hasn't surfaced new data yet (it lags ~24-36h behind today,
+          // and successive cron runs often re-fetch the same 14-day window).
+          // Without this guard every run would still bump `lastUpdated` and
+          // produce a no-op commit.
+          const before = JSON.stringify({ clones: history.clones, views: history.views });
+
           history.clones = merge(history.clones, newClones);
           history.views  = merge(history.views,  newViews);
+
+          const after = JSON.stringify({ clones: history.clones, views: history.views });
+          if (before === after) {
+            console.log('No new data since last run; skipping write to avoid empty commit.');
+            process.exit(0);
+          }
 
           // Recompute totals from the full history every run, so values can't
           // drift even if the script changes.
