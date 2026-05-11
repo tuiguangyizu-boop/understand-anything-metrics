@@ -143,5 +143,18 @@
       "uniques": 2542
     }
   ],
-  "lastUpdated": "2026-05-11T02:57:46.789Z"
+  "lastUpdated": "2026-05-11T03:00:41.996Z",
+  "totals": {
+    "clones": 33075,
+    "uniqueClonerDays": 13653,
+    "peakDailyClones": 3715,
+    "peakDailyUniqueCloners": 1474,
+    "views": 82326,
+    "uniqueVisitorDays": 46322,
+    "peakDailyViews": 10802,
+    "peakDailyUniqueVisitors": 7780,
+    "daysTracked": 14,
+    "firstDay": "2026-04-26T00:00:00Z",
+    "lastDay": "2026-05-09T00:00:00Z"
+  }
 }
