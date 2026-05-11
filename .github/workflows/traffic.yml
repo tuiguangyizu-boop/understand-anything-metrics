@@ -1,0 +1,60 @@
+name: Update traffic data
+
+on:
+  schedule:
+    - cron: '0 3 * * *'  # daily at 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch traffic API
+        env:
+          GH_TOKEN: ${{ secrets.TRAFFIC_TOKEN }}
+        run: |
+          gh api repos/Lum1104/Understand-Anything/traffic/clones --jq '.clones' > /tmp/clones.json
+          gh api repos/Lum1104/Understand-Anything/traffic/views  --jq '.views'  > /tmp/views.json
+
+      - name: Merge into history
+        run: |
+          node <<'EOF'
+          const fs = require('fs');
+          const path = 'data/traffic.json';
+          let history = { clones: [], views: [], lastUpdated: null };
+          if (fs.existsSync(path)) {
+            history = JSON.parse(fs.readFileSync(path, 'utf8'));
+          }
+          const newClones = JSON.parse(fs.readFileSync('/tmp/clones.json', 'utf8'));
+          const newViews  = JSON.parse(fs.readFileSync('/tmp/views.json',  'utf8'));
+
+          // Merge by timestamp (newer wins) so a same-day re-poll updates the day's count.
+          const merge = (existing, fresh) => {
+            const map = new Map(existing.map(e => [e.timestamp, e]));
+            for (const item of fresh) map.set(item.timestamp, item);
+            return [...map.values()].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+          };
+
+          history.clones = merge(history.clones, newClones);
+          history.views  = merge(history.views,  newViews);
+          history.lastUpdated = new Date().toISOString();
+
+          fs.writeFileSync(path, JSON.stringify(history, null, 2) + '\n');
+          EOF
+
+      - name: Commit if changed
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/traffic.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "chore(data): update traffic snapshot"
+          git push
