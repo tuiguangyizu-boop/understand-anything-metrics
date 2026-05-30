@@ -159,6 +159,16 @@
       "count": 27393,
       "timestamp": "2026-05-27T00:00:00Z",
       "uniques": 8479
+    },
+    {
+      "count": 27992,
+      "timestamp": "2026-05-28T00:00:00Z",
+      "uniques": 8399
+    },
+    {
+      "count": 24097,
+      "timestamp": "2026-05-29T00:00:00Z",
+      "uniques": 6945
     }
   ],
   "views": [
@@ -321,20 +331,30 @@
       "count": 52666,
       "timestamp": "2026-05-27T00:00:00Z",
       "uniques": 26060
+    },
+    {
+      "count": 43005,
+      "timestamp": "2026-05-28T00:00:00Z",
+      "uniques": 21285
+    },
+    {
+      "count": 32115,
+      "timestamp": "2026-05-29T00:00:00Z",
+      "uniques": 15464
     }
   ],
-  "lastUpdated": "2026-05-28T06:41:15.483Z",
+  "lastUpdated": "2026-05-30T06:12:21.802Z",
   "totals": {
-    "clones": 192623,
-    "uniqueClonerDays": 66576,
-    "peakDailyClones": 27393,
+    "clones": 244712,
+    "uniqueClonerDays": 81920,
+    "peakDailyClones": 27992,
     "peakDailyUniqueCloners": 9737,
-    "views": 419984,
-    "uniqueVisitorDays": 212269,
+    "views": 495104,
+    "uniqueVisitorDays": 249018,
     "peakDailyViews": 80387,
     "peakDailyUniqueVisitors": 35917,
-    "daysTracked": 32,
+    "daysTracked": 34,
     "firstDay": "2026-04-26T00:00:00Z",
-    "lastDay": "2026-05-27T00:00:00Z"
+    "lastDay": "2026-05-29T00:00:00Z"
   }
 }
