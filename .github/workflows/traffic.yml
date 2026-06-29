@@ -18,8 +18,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.TRAFFIC_TOKEN }}
         run: |
-          gh api repos/Lum1104/Understand-Anything/traffic/clones --jq '.clones' > /tmp/clones.json
-          gh api repos/Lum1104/Understand-Anything/traffic/views  --jq '.views'  > /tmp/views.json
+          gh api repos/tuiguangyizu-boop/understand-anything-metrics/traffic/clones --jq '.clones' > /tmp/clones.json
+          gh api repos/tuiguangyizu-boop/understand-anything-metrics/traffic/views  --jq '.views'  > /tmp/views.json
 
       - name: Merge into history and recompute totals
         run: |
@@ -35,20 +35,12 @@ jobs:
           const newClones = JSON.parse(fs.readFileSync('/tmp/clones.json', 'utf8'));
           const newViews  = JSON.parse(fs.readFileSync('/tmp/views.json',  'utf8'));
 
-          // Merge by timestamp; newer overwrites same-day. History entries that
-          // have aged out of the API's 14-day window stay because they're only
-          // in `existing`, never in `fresh`.
           const merge = (existing, fresh) => {
             const map = new Map(existing.map(e => [e.timestamp, e]));
             for (const item of fresh) map.set(item.timestamp, item);
             return [...map.values()].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
           };
 
-          // Snapshot pre-merge so we can short-circuit when GitHub's traffic
-          // API hasn't surfaced new data yet (it lags ~24-36h behind today,
-          // and successive cron runs often re-fetch the same 14-day window).
-          // Without this guard every run would still bump `lastUpdated` and
-          // produce a no-op commit.
           const before = JSON.stringify({ clones: history.clones, views: history.views });
 
           history.clones = merge(history.clones, newClones);
@@ -60,16 +52,11 @@ jobs:
             process.exit(0);
           }
 
-          // Recompute totals from the full history every run, so values can't
-          // drift even if the script changes.
           const sumBy = (arr, key) => arr.reduce((a, e) => a + (e[key] || 0), 0);
           const maxBy = (arr, key) => arr.reduce((a, e) => Math.max(a, e[key] || 0), 0);
 
           history.totals = {
             clones: sumBy(history.clones, 'count'),
-            // uniqueClonerDays = sum of daily-unique counts. Not the same as
-            // "total unique users since start" — GitHub doesn't expose cloner
-            // identity, so a user who clones on 5 days is counted 5 times here.
             uniqueClonerDays: sumBy(history.clones, 'uniques'),
             peakDailyClones: maxBy(history.clones, 'count'),
             peakDailyUniqueCloners: maxBy(history.clones, 'uniques'),
